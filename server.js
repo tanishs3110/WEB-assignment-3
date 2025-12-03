@@ -12,65 +12,50 @@
 
 require("dotenv").config();
 const express = require("express");
-const path = require("path");
 const clientSessions = require("client-sessions");
 
-// DB setups
 const connectMongo = require("./config/mongoose");
 const sequelize = require("./config/sequelize");
 
-// Routes
 const authRoutes = require("./routes/auth");
 const taskRoutes = require("./routes/tasks");
 
-const app = express();
+async function createServer() {
+  const app = express();
 
-/* ----------------------------------------------------
-   EJS SETUP
----------------------------------------------------- */
-app.set("view engine", "ejs");
+  app.set("view engine", "ejs");
 
-/* ----------------------------------------------------
-   MIDDLEWARE
----------------------------------------------------- */
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
-app.use(express.static(__dirname + '/public'));
-app.set('views', __dirname + '/views');
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.static("public"));
+  app.set("views", __dirname + "/views");
 
+  app.use(
+    clientSessions({
+      cookieName: "session",
+      secret: process.env.SESSION_SECRET,
+      duration: 30 * 60 * 1000,
+      activeDuration: 10 * 60 * 1000,
+    })
+  );
 
-app.use(
-  clientSessions({
-    cookieName: "session",
-    secret: process.env.SESSION_SECRET,
-    duration: 30 * 60 * 1000,
-    activeDuration: 10 * 60 * 1000
-  })
-);
+  app.use((req, res, next) => {
+    res.locals.user = req.session.user || null;
+    next();
+  });
 
-// Pass logged-in user to views
-app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
-  next();
-});
+  // ROUTES
+  app.get("/", (req, res) => res.render("home"));
+  app.use("/", authRoutes);
+  app.use("/", taskRoutes);
 
-/* ----------------------------------------------------
-   ROUTES
----------------------------------------------------- */
-app.get("/", (req, res) => res.render("home"));
-app.use("/", authRoutes);
-app.use("/", taskRoutes);
+  // FORCE DB CONNECTIONS FIRST
+  await connectMongo();
+  await sequelize.authenticate();
+  await sequelize.sync();
 
-/* ----------------------------------------------------
-   START SERVER (only after DBs connect)
----------------------------------------------------- */
-connectMongo()
-  .then(() => sequelize.authenticate())
-  .then(() => {
-    console.log("PostgreSQL connected");
-    return sequelize.sync();
-  })
-  .then(() => console.log("Databases initialized"))
-  .catch((err) => console.error("Startup error:", err));
+  console.log("All databases connected ✔");
 
-module.exports = app;
+  return app;
+}
+
+module.exports = createServer();
