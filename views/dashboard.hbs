@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/css/main.css"/>
+</head>
+
+<body>
+
+<div class="center-card">
+  <h1>Welcome, {{user.username}}!</h1>
+
+  <p style="margin: 10px 0 20px;">
+    Email: {{user.email}}
+  </p>
+
+  <a class="link" style="margin-right: 20px;" href="/tasks">View Tasks</a>
+  <a class="btn btn-warning" href="/logout">Logout</a>
+</div>
+
+</body>
+</html>

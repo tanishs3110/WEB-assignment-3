@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Edit Task</title>
+  <link rel="stylesheet" href="/css/main.css"/>
+</head>
+
+<body>
+
+<div class="card">
+  <h2 class="card-title">Edit Task</h2>
+
+  <form method="POST" action="/tasks/edit/{{task.id}}">
+
+    <input
+      name="title"
+      type="text"
+      class="input"
+      value="{{task.title}}"
+      required
+    />
+
+    <textarea
+      name="description"
+      class="textarea"
+    >{{task.description}}</textarea>
+
+    <input
+      name="dueDate"
+      type="date"
+      class="input"
+      value="{{task.dueDate}}"
+    />
+
+    <select name="status" class="input">
+      <option
+        value="pending"
+        {{#ifCond task.status 'pending'}}selected{{/ifCond}}>
+        Pending
+      </option>
+
+      <option
+        value="completed"
+        {{#ifCond task.status 'completed'}}selected{{/ifCond}}>
+        Completed
+      </option>
+    </select>
+
+    <button class="btn btn-primary" type="submit">Update Task</button>
+
+  </form>
+
+  <p style="margin-top: 10px;">
+    <a class="link" href="/tasks">Back to Tasks</a>
+  </p>
+
+</div>
+
+</body>
+</html>

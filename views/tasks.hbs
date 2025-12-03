@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Your Tasks</title>
+  <link rel="stylesheet" href="/css/main.css"/>
+</head>
+
+<body>
+
+<div class="navbar">
+  <h2>Your Tasks</h2>
+
+  <div>
+    <a href="/tasks/add" class="btn btn-primary">Add Task</a>
+    <a href="/dashboard" class="btn btn-secondary" style="margin-left: 10px;">Dashboard</a>
+    <a href="/logout" class="btn btn-warning" style="margin-left: 10px;">Logout</a>
+  </div>
+</div>
+
+<div class="tasks-container">
+
+  {{#if tasks.length}}
+    {{#each tasks}}
+      <div class="task-card">
+
+        <h3 style="margin-bottom: 6px;">{{title}}</h3>
+
+        <p style="margin: 8px 0;">{{description}}</p>
+
+        <p style="font-size: 0.9rem; opacity: 0.7;">
+          Due: {{dueDate}}
+        </p>
+
+        <div style="margin-top: 15px;">
+          <span class="badge 
+                {{#ifCond status 'completed'}}
+                    badge-success
+                {{else}}
+                    badge-warning
+                {{/ifCond}}">
+            {{status}}
+          </span>
+        </div>
+
+        <div style="margin-top: 15px; display: flex; gap: 10px;">
+
+          <a href="/tasks/edit/{{id}}" class="btn btn-primary">Edit</a>
+
+          <form method="POST" action="/tasks/delete/{{id}}">
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </form>
+
+          <form method="POST" action="/tasks/status/{{id}}">
+            <input type="hidden" name="status"
+              value="{{#ifCond status 'completed'}}pending{{else}}completed{{/ifCond}}">
+            <button type="submit" class="btn btn-warning">
+              {{#ifCond status 'completed'}}Mark Pending{{else}}Mark Complete{{/ifCond}}
+            </button>
+          </form>
+
+        </div>
+
+      </div>
+    {{/each}}
+
+  {{else}}
+    <p style="text-align:center; margin-top: 30px;">You have no tasks yet.</p>
+  {{/if}}
+
+</div>
+
+</body>
+</html>

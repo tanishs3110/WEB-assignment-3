@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Add Task</title>
+  <link rel="stylesheet" href="/css/main.css"/>
+</head>
+
+<body>
+
+<div class="card">
+  <h2 class="card-title">Add New Task</h2>
+
+  <form method="POST" action="/tasks/add">
+
+    <input
+      name="title"
+      type="text"
+      class="input"
+      placeholder="Task Title"
+      required
+    />
+
+    <textarea
+      name="description"
+      class="textarea"
+      placeholder="Description"
+    ></textarea>
+
+    <input
+      name="dueDate"
+      type="date"
+      class="input"
+    />
+
+    <button class="btn btn-primary" type="submit">Create Task</button>
+  </form>
+
+  <p style="margin-top: 10px;">
+    <a class="link" href="/tasks">Back to Tasks</a>
+  </p>
+
+</div>
+
+</body>
+</html>
