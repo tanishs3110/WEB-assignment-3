@@ -12,8 +12,6 @@
 
 require("dotenv").config();
 const express = require("express");
-const path = require("path");
-const exphbs = require("express-handlebars");
 const clientSessions = require("client-sessions");
 
 // DB setups
@@ -26,32 +24,17 @@ const taskRoutes = require("./routes/tasks");
 
 const app = express();
 
-// Handlebars (with prototype access FIX)
-app.engine(
-  "hbs",
-  exphbs.engine({
-    extname: "hbs",
-    defaultLayout: false,
-    // this fix is required for Sequelize models to work
-    runtimeOptions: {
-      allowProtoPropertiesByDefault: true,
-      allowProtoMethodsByDefault: true
-    },
-    helpers: {
-      ifCond: function (v1, v2, options) {
-        return v1 === v2 ? options.fn(this) : options.inverse(this);
-      }
-    }
-  })
-);
+/* ----------------------------------------------------
+   EJS SETUP
+---------------------------------------------------- */
+app.set("view engine", "ejs");
 
-app.set("view engine", "hbs");
-
-// Middleware
+/* ----------------------------------------------------
+   MIDDLEWARE
+---------------------------------------------------- */
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-// Sessions
 app.use(
   clientSessions({
     cookieName: "session",
@@ -61,21 +44,22 @@ app.use(
   })
 );
 
-// Make user available to views
+// Pass logged-in user to views
 app.use((req, res, next) => {
-  res.locals.user = req.session.user;
+  res.locals.user = req.session.user || null;
   next();
 });
 
-// Routes
-app.get("/", (req, res) => {
-  res.render("home");
-});
-
+/* ----------------------------------------------------
+   ROUTES
+---------------------------------------------------- */
+app.get("/", (req, res) => res.render("home"));
 app.use("/", authRoutes);
 app.use("/", taskRoutes);
 
-// Start server after DB connects
+/* ----------------------------------------------------
+   START SERVER (only after DBs connect)
+---------------------------------------------------- */
 connectMongo()
   .then(() => sequelize.authenticate())
   .then(() => {
@@ -86,6 +70,4 @@ connectMongo()
     const PORT = process.env.PORT || 8080;
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
-  .catch((err) => {
-    console.error("Startup error:", err);
-  });
+  .catch((err) => console.error("Startup error:", err));

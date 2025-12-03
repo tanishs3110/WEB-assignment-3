@@ -5,52 +5,44 @@ const User = require("../models/User");
 const router = express.Router();
 
 // REGISTER PAGE
-router.get("/register", (req, res) => {
-  res.render("register");
-});
+router.get("/register", (req, res) => res.render("register", { error: null }));
 
 // REGISTER POST
 router.post("/register", async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+  const { username, email, password } = req.body;
 
-    if (!username || !email || !password)
-      return res.render("register", { error: "All fields required" });
+  const exists = await User.findOne({ email });
+  if (exists) return res.render("register", { error: "Email already exists" });
 
-    const exists = await User.findOne({ email });
-    if (exists)
-      return res.render("register", { error: "Email already exists" });
+  const hash = await bcrypt.hash(password, 10);
 
-    const hashed = await bcrypt.hash(password, 10);
+  const newUser = await User.create({
+    username,
+    email,
+    password: hash
+  });
 
-    await User.create({
-      username,
-      email,
-      password: hashed
-    });
+  req.session.user = {
+    id: newUser._id.toString(),
+    username: newUser.username,
+    email: newUser.email
+  };
 
-    res.redirect("/login");
-  } catch (err) {
-    res.render("register", { error: "Registration error" });
-  }
+  res.redirect("/dashboard");
 });
 
 // LOGIN PAGE
-router.get("/login", (req, res) => {
-  res.render("login");
-});
+router.get("/login", (req, res) => res.render("login", { error: null }));
 
 // LOGIN POST
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body;  // Changed from username to email
 
-  const user = await User.findOne({ email });
-  if (!user)
-    return res.render("login", { error: "Invalid credentials" });
+  const user = await User.findOne({ email });  // Query by email
+  if (!user) return res.render("login", { error: "Invalid credentials" });
 
   const match = await bcrypt.compare(password, user.password);
-  if (!match)
-    return res.render("login", { error: "Invalid credentials" });
+  if (!match) return res.render("login", { error: "Invalid credentials" });
 
   req.session.user = {
     id: user._id.toString(),

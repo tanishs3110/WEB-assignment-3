@@ -21,53 +21,49 @@
 
 <div class="tasks-container">
 
-  {{#if tasks.length}}
-    {{#each tasks}}
+  <% if (tasks.length) { %>
+    <% tasks.forEach(task => { %>
       <div class="task-card">
 
-        <h3 style="margin-bottom: 6px;">{{title}}</h3>
+        <h3 style="margin-bottom: 6px;"><%= task.title %></h3>
 
-        <p style="margin: 8px 0;">{{description}}</p>
+        <p style="margin: 8px 0;"><%= task.description %></p>
 
         <p style="font-size: 0.9rem; opacity: 0.7;">
-          Due: {{dueDate}}
+          Due: <%= task.dueDate %>
         </p>
 
         <div style="margin-top: 15px;">
           <span class="badge 
-                {{#ifCond status 'completed'}}
-                    badge-success
-                {{else}}
-                    badge-warning
-                {{/ifCond}}">
-            {{status}}
+                <%= task.status === 'completed' ? 'badge-success' : 'badge-warning' %>">
+            <%= task.status %>
           </span>
         </div>
 
         <div style="margin-top: 15px; display: flex; gap: 10px;">
 
-          <a href="/tasks/edit/{{id}}" class="btn btn-primary">Edit</a>
+          <a href="/tasks/edit/<%= task.id %>" class="btn btn-primary">Edit</a>
 
-          <form method="POST" action="/tasks/delete/{{id}}">
+          <form method="POST" action="/tasks/delete/<%= task.id %>">
             <button type="submit" class="btn btn-danger">Delete</button>
           </form>
 
-          <form method="POST" action="/tasks/status/{{id}}">
+          <form method="POST" action="/tasks/status/<%= task.id %>">
             <input type="hidden" name="status"
-              value="{{#ifCond status 'completed'}}pending{{else}}completed{{/ifCond}}">
+              value="<%= task.status === 'completed' ? 'pending' : 'completed' %>">
             <button type="submit" class="btn btn-warning">
-              {{#ifCond status 'completed'}}Mark Pending{{else}}Mark Complete{{/ifCond}}
+              <%= task.status === 'completed' ? 'Mark Pending' : 'Mark Complete' %>
             </button>
           </form>
 
         </div>
 
       </div>
-    {{/each}}
+    <% }) %>
 
-  {{else}}
+  <% } else { %>
     <p style="text-align:center; margin-top: 30px;">You have no tasks yet.</p>
-  {{/if}}
+  <% } %>
 
 </div>
 

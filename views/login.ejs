@@ -3,24 +3,20 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Register</title>
+  <title>Login</title>
   <link rel="stylesheet" href="/css/main.css"/>
 </head>
 
 <body>
 
 <div class="card">
-  <h2 class="card-title">Create an Account</h2>
+  <h2 class="card-title">Login</h2>
 
-  <form method="POST" action="/register">
+  <% if (error) { %>
+    <p style="color: red; margin-bottom: 10px;"><%= error %></p>
+  <% } %>
 
-    <input
-      name="username"
-      type="text"
-      placeholder="Username"
-      class="input"
-      required
-    />
+  <form method="POST" action="/login">
 
     <input
       name="email"
@@ -38,12 +34,12 @@
       required
     />
 
-    <button class="btn btn-primary" type="submit">Register</button>
+    <button class="btn btn-primary" type="submit">Login</button>
 
   </form>
 
   <p style="margin-top: 10px;">
-    <a href="/login" class="link">Already have an account?</a>
+    <a href="/register" class="link">Don't have an account?</a>
   </p>
 
 </div>
