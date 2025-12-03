@@ -5,23 +5,31 @@ const User = require("../models/User");
 const router = express.Router();
 
 // REGISTER PAGE
-router.get("/register", (req, res) => res.render("register", { error: null }));
-
-// REGISTER POST
 router.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
 
-  const exists = await User.findOne({ email });
-  if (exists) return res.render("register", { error: "Email already exists" });
+  // Check if email OR username is already used
+  const existsUser = await User.findOne({
+    $or: [{ email }, { username }]
+  });
 
+  if (existsUser) {
+    return res.render("register", {
+      error: "Email or username already exists"
+    });
+  }
+
+  // Hash password
   const hash = await bcrypt.hash(password, 10);
 
+  // Create user
   const newUser = await User.create({
     username,
     email,
     password: hash
   });
 
+  // Set session
   req.session.user = {
     id: newUser._id.toString(),
     username: newUser.username,
@@ -30,6 +38,7 @@ router.post("/register", async (req, res) => {
 
   res.redirect("/dashboard");
 });
+
 
 // LOGIN PAGE
 router.get("/login", (req, res) => res.render("login", { error: null }));
