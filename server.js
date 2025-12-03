@@ -70,8 +70,7 @@ connectMongo()
     console.log("PostgreSQL connected");
     return sequelize.sync();
   })
-  .then(() => {
-    const PORT = process.env.PORT || 8080;
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
+  .then(() => console.log("Databases initialized"))
   .catch((err) => console.error("Startup error:", err));
+
+module.exports = app;
