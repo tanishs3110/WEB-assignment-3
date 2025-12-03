@@ -14,7 +14,6 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const clientSessions = require("client-sessions");
-const serverless = require("serverless-http");
 
 // DB setups
 const connectMongo = require("./config/mongoose");
@@ -26,13 +25,19 @@ const taskRoutes = require("./routes/tasks");
 
 const app = express();
 
-/* EJS SETUP */
+/* ----------------------------------------------------
+   EJS SETUP
+---------------------------------------------------- */
 app.set("view engine", "ejs");
 
-/* MIDDLEWARE */
+/* ----------------------------------------------------
+   MIDDLEWARE
+---------------------------------------------------- */
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
-app.use("/public", express.static(path.join(__dirname, "public")));
+app.use(express.static(__dirname + '/public'));
+app.set('views', __dirname + '/views');
+
 
 app.use(
   clientSessions({
@@ -43,33 +48,30 @@ app.use(
   })
 );
 
+// Pass logged-in user to views
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   next();
 });
 
-/* ROUTES */
+/* ----------------------------------------------------
+   ROUTES
+---------------------------------------------------- */
 app.get("/", (req, res) => res.render("home"));
 app.use("/", authRoutes);
 app.use("/", taskRoutes);
 
-/* DATABASE INIT (lazy) */
-let ready = false;
-async function init() {
-  if (ready) return;
-  await connectMongo();
-  await sequelize.authenticate();
-  await sequelize.sync();
-  ready = true;
-}
-
-// ensure DBs connect before each request
-app.use(async (req, res, next) => {
-  await init();
-  next();
-});
-
-/* EXPORT FOR VERCEL */
-module.exports = serverless(app);
-const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+/* ----------------------------------------------------
+   START SERVER (only after DBs connect)
+---------------------------------------------------- */
+connectMongo()
+  .then(() => sequelize.authenticate())
+  .then(() => {
+    console.log("PostgreSQL connected");
+    return sequelize.sync();
+  })
+  .then(() => {
+    const PORT = process.env.PORT || 8080;
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch((err) => console.error("Startup error:", err));
